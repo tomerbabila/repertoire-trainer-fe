@@ -1,4 +1,6 @@
 :root {
+  --square-size: 50px;
+  --row-size: calc(8 * 100px);
   --dark-square: #964d22;
   --light-square: #eedc97;
 }

@@ -2,10 +2,12 @@ import { Outlet } from 'react-router';
 
 function Layout() {
   return (
-    <div className='flex min-h-svh flex-col items-center justify-center'>
-      <div>this is going to be a header</div>
-      <Outlet />
-      <div>this is going to be a footer</div>
+    <div className='min-h-screen flex flex-col items-center justify-between px-4 py-6 max-w-full'>
+      <header className='text-lg font-semibold'>this is going to be a header</header>
+      <main className='w-full flex justify-center'>
+        <Outlet />
+      </main>
+      <footer className='text-sm text-muted-foreground'>this is going to be a footer</footer>
     </div>
   );
 }
