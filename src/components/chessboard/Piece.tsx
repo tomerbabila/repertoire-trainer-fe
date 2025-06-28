@@ -14,18 +14,18 @@ import blackQ from '@/assets/bq.png';
 import blackK from '@/assets/bk.png';
 
 const pieceMap: Record<string, string> = {
-  P: whiteP,
-  R: whiteR,
-  N: whiteN,
-  B: whiteB,
-  Q: whiteQ,
-  K: whiteK,
-  p: blackP,
-  r: blackR,
-  n: blackN,
-  b: blackB,
-  q: blackQ,
-  k: blackK,
+  wp: whiteP,
+  wr: whiteR,
+  wn: whiteN,
+  wb: whiteB,
+  wq: whiteQ,
+  wk: whiteK,
+  bp: blackP,
+  br: blackR,
+  bn: blackN,
+  bb: blackB,
+  bq: blackQ,
+  bk: blackK,
 };
 
 interface IPiece {

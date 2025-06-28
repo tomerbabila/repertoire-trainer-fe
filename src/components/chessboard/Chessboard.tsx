@@ -1,5 +1,5 @@
-import Piece from './Piece';
 import Square from './Square';
+import { ChessProvider } from './ChessProvider';
 
 export default function Chessboard() {
   const ranks = Array(8)
@@ -9,32 +9,17 @@ export default function Chessboard() {
     .fill(null)
     .map((_, i) => i + 1);
 
-  // TODO: replace with context
-  const board: (string | null)[][] = [
-    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
-  ];
-
   return (
-    <div className='border w-full max-w-[400px] p-2 box-border rounded-md'>
-      <div className='grid grid-cols-8 grid-rows-8 w-full h-full aspect-square'>
-        {ranks.map((rank, i) =>
-          files.map((file, j) => {
-            const piece = board[i][j];
-            return (
-              <Square rank={{ r: rank, i: i }} file={{ f: file, j: j }}>
-                {piece && <Piece type={piece} />}
-              </Square>
-            );
-          })
-        )}
+    <ChessProvider>
+      <div className='border w-full max-w-[400px] p-2 box-border rounded-md'>
+        <div className='grid grid-cols-8 grid-rows-8 w-full h-full aspect-square'>
+          {ranks.map((rank, i) =>
+            files.map((file, j) => {
+              return <Square key={`${rank}${file}`} rank={{ r: rank, i: i }} file={{ f: file, j: j }} />;
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </ChessProvider>
   );
 }
