@@ -1,4 +1,5 @@
-import { getChar } from '@/helpers';
+import Piece from './Piece';
+import Square from './Square';
 
 export default function Chessboard() {
   const ranks = Array(8)
@@ -8,28 +9,28 @@ export default function Chessboard() {
     .fill(null)
     .map((_, i) => i + 1);
 
-  const getSquareColor = (isDark: boolean) => (isDark ? 'bg-[var(--dark-square)]' : 'bg-[var(--light-square)]');
+  // TODO: replace with context
+  const board: (string | null)[][] = [
+    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+  ];
 
   return (
-    <div className='border w-full max-w-[400px] p-2 box-border'>
+    <div className='border w-full max-w-[400px] p-2 box-border rounded-md'>
       <div className='grid grid-cols-8 grid-rows-8 w-full h-full aspect-square'>
         {ranks.map((rank, i) =>
           files.map((file, j) => {
-            const isDark = (i + j) % 2 === 1;
-            const isFirstFile = i === 7;
-            const isFirstRank = j === 0;
-
+            const piece = board[i][j];
             return (
-              <div
-                key={`${rank}${file}`}
-                className={`relative flex items-center justify-center text-xs ${getSquareColor(isDark)}`}
-              >
-                {isFirstRank && <span className='absolute top-0 left-0 text-[10px] text-gray-700 m-1'>{rank}</span>}
-
-                {isFirstFile && (
-                  <span className='absolute bottom-0 right-0 text-[10px] text-gray-700 m-1'>{getChar(file)}</span>
-                )}
-              </div>
+              <Square rank={{ r: rank, i: i }} file={{ f: file, j: j }}>
+                {piece && <Piece type={piece} />}
+              </Square>
             );
           })
         )}
