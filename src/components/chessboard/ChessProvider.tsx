@@ -20,7 +20,7 @@ type Action =
   | { type: ACTIONS.INIT; payload: { playerColor: 'w' | 'b' } }
   | { type: ACTIONS.MOVE; payload: { from: string; to: string } }
   | { type: ACTIONS.RESET }
-  | { type: ACTIONS.CHOOSE_SQUARE; payload: { chosenSquare: Square } };
+  | { type: ACTIONS.CHOOSE_SQUARE; payload: { chosenSquare: Square | null } };
 
 function getInitialState(): State {
   const chess = new Chess();
@@ -67,14 +67,13 @@ function reducer(state: State, action: Action): State {
     case ACTIONS.CHOOSE_SQUARE: {
       const newChess = cloneChessInstance(state.chess);
       const { chosenSquare } = action.payload;
+      if (!chosenSquare) {
+        return { ...state, chosenSquare: { square: null, moves: [] } };
+      }
       const chosenSquareData = newChess.get(chosenSquare);
-
       if (newChess.turn() !== chosenSquareData?.color) return state;
-
       const moves = newChess.moves({ square: chosenSquare, verbose: true });
-
       if (!moves.length) return { ...state, chosenSquare: { square: null, moves: [] } };
-
       return { ...state, chess: newChess, chosenSquare: { square: chosenSquare, moves: moves } };
     }
 
