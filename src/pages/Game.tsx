@@ -1,5 +1,5 @@
-import Chessboard from '@/components/chessboard/Chessboard';
+import Chess from '@/components/chessboard/Chess';
 
 export default function Game() {
-  return <Chessboard />;
+  return <Chess />;
 }

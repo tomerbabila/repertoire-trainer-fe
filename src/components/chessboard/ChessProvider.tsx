@@ -22,11 +22,10 @@ type Action =
   | { type: ACTIONS.RESET }
   | { type: ACTIONS.CHOOSE_SQUARE; payload: { chosenSquare: Square } };
 
-// --- Initial State ---
 function getInitialState(): State {
   const chess = new Chess();
   return {
-    chess,
+    chess: new Chess(),
     fen: chess.fen(),
     moveIndex: 0,
     playerColor: 'w',
@@ -35,29 +34,27 @@ function getInitialState(): State {
 }
 
 function reducer(state: State, action: Action): State {
-  const { chess } = state;
-
   switch (action.type) {
     case ACTIONS.INIT: {
-      const newChess = new Chess();
       const { playerColor } = action.payload;
 
       return {
         ...getInitialState(),
-        chess: newChess,
         playerColor: playerColor,
       };
     }
 
     case ACTIONS.MOVE: {
+      const newChess = cloneChessInstance(state.chess);
       const { from, to } = action.payload;
-      const move = chess.move({ from: from, to: to });
+      const move = newChess.move({ from, to });
 
       if (!move) return state;
 
       return {
         ...state,
-        fen: chess.fen(),
+        chess: newChess,
+        fen: newChess.fen(),
         moveIndex: state.moveIndex + 1,
         chosenSquare: { square: null, moves: [] },
       };
@@ -68,20 +65,28 @@ function reducer(state: State, action: Action): State {
     }
 
     case ACTIONS.CHOOSE_SQUARE: {
+      const newChess = cloneChessInstance(state.chess);
       const { chosenSquare } = action.payload;
+      const chosenSquareData = newChess.get(chosenSquare);
 
-      if (chess.turn() !== state.playerColor) return state;
+      if (newChess.turn() !== chosenSquareData?.color) return state;
 
-      const moves = chess.moves({ square: chosenSquare, verbose: true });
+      const moves = newChess.moves({ square: chosenSquare, verbose: true });
 
       if (!moves.length) return { ...state, chosenSquare: { square: null, moves: [] } };
 
-      return { ...state, chosenSquare: { square: chosenSquare, moves: moves } };
+      return { ...state, chess: newChess, chosenSquare: { square: chosenSquare, moves: moves } };
     }
 
     default:
       return state;
   }
+}
+
+function cloneChessInstance(original: Chess): Chess {
+  const clone = new Chess();
+  clone.loadPgn(original.pgn()); // restores board, history, turns, etc.
+  return clone;
 }
 
 const ChessContext = createContext<
