@@ -2,7 +2,6 @@ import Square from './Square';
 import { ACTIONS, useChess } from './ChessProvider';
 import { useEffect } from 'react';
 
-// Helper to generate board coordinates
 const BOARD_SIZE = 8;
 const getRanks = () => Array.from({ length: BOARD_SIZE }, (_, i) => 8 - i);
 const getFiles = () => Array.from({ length: BOARD_SIZE }, (_, i) => i + 1);
@@ -20,9 +19,11 @@ export default function Chessboard() {
   return (
     <div className='border w-full max-w-[400px] p-2 box-border rounded-md'>
       <div className='grid grid-cols-8 grid-rows-8 w-full h-full aspect-square'>
-        {ranks.map((rank, i) =>
-          files.map((file, j) => <Square key={`${rank}${file}`} rank={{ r: rank, i }} file={{ f: file, j }} />)
-        )}
+        {ranks.map((rankNum, rankIdx) => {
+          return files.map((fileNum, fileIdx) => (
+            <Square key={`${rankNum}${fileNum}`} rank={{ rankNum, rankIdx }} file={{ fileNum, fileIdx }} />
+          ));
+        })}
       </div>
     </div>
   );

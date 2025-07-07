@@ -1,58 +1,60 @@
+import { useMemo } from 'react';
+import { useDrop } from 'react-dnd';
 import { getChar } from '@/helpers';
 import { ACTIONS, useChess } from './ChessProvider';
 import Piece from './Piece';
 import { type Square as ChessSquare } from 'chess.js';
-import { useDrop } from 'react-dnd';
 
 interface SquareProps {
-  rank: { r: number; i: number };
-  file: { f: number; j: number };
+  rank: { rankNum: number; rankIdx: number };
+  file: { fileNum: number; fileIdx: number };
 }
 
 export default function Square({ file, rank }: SquareProps) {
   const { chosenSquare, dispatch, chess } = useChess();
-  const { r, i } = rank;
-  const { f, j } = file;
-  const isDark = (i + j) % 2 === 1;
-  const isFirstFile = i === 7;
-  const isFirstRank = j === 0;
 
-  // Helper: get piece type at this square
+  const { rankNum, rankIdx } = rank;
+  const { fileNum, fileIdx } = file;
+
+  const isDark = useMemo(() => (rankIdx + fileIdx) % 2 === 1, [rankIdx, fileIdx]);
+  const isFirstFile = useMemo(() => rankIdx === 7, [rankIdx]);
+  const isFirstRank = useMemo(() => fileIdx === 0, [fileIdx]);
+  const bgColor = useMemo(() => (isDark ? 'bg-[var(--dark-square)]' : 'bg-[var(--light-square)]'), [isDark]);
+  const textColor = useMemo(() => (!isDark ? 'text-[var(--dark-square)]' : 'text-[var(--light-square)]'), [isDark]);
+
   const getPieceType = () => {
     const board = chess.board();
-    const p = board[i][j];
-    if (!p) return '';
-    return p.color + p.type;
+    const piece = board[rankIdx][fileIdx];
+    if (!piece) return '';
+    return piece.color + piece.type;
   };
 
-  // Helper: get square name (e.g. 'e4')
-  const getSquareName = () => (getChar(f) + r) as ChessSquare;
+  const getSquareName = () => (getChar(fileNum) + rankNum) as ChessSquare;
   const squareName = getSquareName();
 
   // DnD drop logic
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'piece',
+    canDrop: (item: { type: string; square: string }) => {
+      if (!item || !item.square) return false;
+      // Use chosenSquare.moves if the dragged piece is the selected one
+      if (chosenSquare.square === item.square && chosenSquare.moves) {
+        return chosenSquare.moves.some((m) => m.to === squareName);
+      }
+      // Otherwise, fallback to not allowing drop
+      return false;
+    },
     drop: (item: { type: string; square: string }) => {
-      if (item.square !== squareName) {
-        dispatch({ type: ACTIONS.MOVE, payload: { from: item.square, to: squareName } });
+      if (chosenSquare.square === item.square && chosenSquare.moves) {
+        if (chosenSquare.moves.some((m) => m.to === squareName)) {
+          dispatch({ type: ACTIONS.MOVE, payload: { from: item.square, to: squareName } });
+        }
       }
     },
-    canDrop: () => true,
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop(),
     }),
-    // Show indicators on drag start
-    hover: (item, monitor) => {
-      if (monitor.isOver({ shallow: true })) {
-        // Only show indicators for the piece being dragged
-        if (getPieceType() && getPieceType()[0] === chess.turn()) {
-          if (!chosenSquare.square || chosenSquare.square !== squareName) {
-            dispatch({ type: ACTIONS.CHOOSE_SQUARE, payload: { chosenSquare: squareName } });
-          }
-        }
-      }
-    },
   });
 
   // Click logic for moving or clearing indicators
@@ -72,26 +74,23 @@ export default function Square({ file, rank }: SquareProps) {
     }
   };
 
-  const getSquareColor = (isDark: boolean) => (isDark ? '--dark-square' : '--light-square');
-
   return (
     <div
       ref={drop as unknown as React.RefCallback<HTMLDivElement>}
       onClick={handleSquareClick}
-      className={`relative flex items-center justify-center text-xs bg-[var(${getSquareColor(isDark)})]`}
+      className={`relative flex items-center justify-center text-xs ${bgColor}`}
     >
-      {isFirstRank && <span className={`absolute top-0 left-0 text-(${getSquareColor(!isDark)}) m-1`}>{r}</span>}
-      {isFirstFile && (
-        <span className={`absolute bottom-0 right-0 text-(${getSquareColor(!isDark)}) m-1`}>{getChar(f)}</span>
-      )}
+      {isFirstRank && <span className={`absolute top-0 left-0 m-1 ${textColor}`}>{rankNum}</span>}
+      {isFirstFile && <span className={`absolute bottom-0 right-0 m-1 ${textColor}`}>{getChar(fileNum)}</span>}
       <Piece type={getPieceType()} square={squareName} />
-      {/* Show indicator if this square is a move option from the currently chosen square */}
       {chosenSquare.square && chosenSquare.moves.some((m) => m.to === squareName) && (
         <Indicator
           type={chosenSquare.moves.find((m) => m.to === squareName)?.flags.includes('c') ? 'capture' : 'move'}
         />
       )}
-      {isOver && canDrop && <div className='absolute inset-0 bg-green-300 opacity-20 pointer-events-none' />}
+      {chosenSquare.square && isOver && canDrop && (
+        <div className='absolute inset-0 bg-green-300 opacity-50 pointer-events-none' />
+      )}
     </div>
   );
 }

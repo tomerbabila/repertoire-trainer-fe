@@ -13,7 +13,10 @@ import blackB from '@/assets/bb.png';
 import blackQ from '@/assets/bq.png';
 import blackK from '@/assets/bk.png';
 import { useDrag } from 'react-dnd';
-import { useChess } from './ChessProvider';
+import type { DragSourceMonitor } from 'react-dnd';
+import { useChess, ACTIONS } from './ChessProvider';
+import { type Square as ChessSquare } from 'chess.js';
+import { useEffect, useRef } from 'react';
 
 const pieceMap: Record<string, string> = {
   wp: whiteP,
@@ -37,21 +40,37 @@ interface PieceProps {
 
 export default function Piece({ type, square }: PieceProps) {
   const src = pieceMap[type];
-  const { chess } = useChess();
+  const { chess, chosenSquare, dispatch } = useChess();
   const canDrag = !!type && type[0] === chess.turn();
-  const [{ isDragging }, drag] = useDrag({
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [{ isDragging }, drag, dragPreview] = useDrag({
     type: 'piece',
     item: { type, square },
-    canDrag: () => !!type && type[0] === chess.turn(),
-    collect: (monitor) => ({
+    canDrag: () => canDrag,
+    collect: (monitor: DragSourceMonitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
+
+  useEffect(() => {
+    // Hide default drag preview (square background) and show only the piece
+    dragPreview(new Image());
+  }, [dragPreview]);
+
+  useEffect(() => {
+    if (isDragging && chosenSquare.square !== square) {
+      dispatch({ type: ACTIONS.CHOOSE_SQUARE, payload: { chosenSquare: square as ChessSquare } });
+    }
+  }, [isDragging, chosenSquare.square, square, dispatch]);
+
   if (!src) return null;
 
   return (
     <img
-      ref={drag as unknown as React.RefCallback<HTMLImageElement>}
+      ref={(node) => {
+        drag(node);
+        imgRef.current = node;
+      }}
       src={src}
       alt={type}
       className={`absolute w-full h-full object-contain${isDragging ? ' opacity-50' : ''}`}
