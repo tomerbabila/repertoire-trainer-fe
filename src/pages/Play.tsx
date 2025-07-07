@@ -1,5 +1,5 @@
 import Chess from '@/components/chessboard/Chess';
 
-export default function Game() {
+export default function Play() {
   return <Chess />;
 }

@@ -1,4 +1,5 @@
 import Layout from './Layout';
-import Game from './Game';
+import Play from './Play';
+import Home from './Home';
 
-export { Layout, Game };
+export { Layout, Play, Home };

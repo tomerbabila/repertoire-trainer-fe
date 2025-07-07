@@ -10,3 +10,18 @@ export const initialBoard: (string | null)[][] = [
   ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
   ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
 ];
+
+export const openings = [
+  { name: 'Vienna Game', key: 'vienna-game', description: 'A flexible opening starting with 1.e4 e5 2.Nc3.' },
+  {
+    name: 'Vienna Gambit',
+    key: 'vienna-gambit',
+    description: 'A sharp gambit in the Vienna Game: 1.e4 e5 2.Nc3 Nf6 3.f4.',
+  },
+  { name: 'King’s Gambit Accepted', key: 'kga', description: 'A classic gambit: 1.e4 e5 2.f4 exf4.' },
+  {
+    name: 'King’s Gambit Declined',
+    key: 'kgd',
+    description: 'A solid response to the King’s Gambit: 1.e4 e5 2.f4 Bc5.',
+  },
+];
