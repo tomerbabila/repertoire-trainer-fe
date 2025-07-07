@@ -3,4 +3,6 @@
   --row-size: calc(8 * 100px);
   --dark-square: #964d22;
   --light-square: #eedc97;
+  --promotion-bg: #1c1c24;
+  --promotion-hover: #7c7c7c;
 }
