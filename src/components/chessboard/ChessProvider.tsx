@@ -7,20 +7,27 @@ interface State {
   moveIndex: number;
   playerColor: 'w' | 'b';
   chosenSquare: { square: Square | null; moves: Move[] };
+  pendingPromotion: {
+    from: string;
+    to: string;
+    color: 'w' | 'b';
+  } | null;
 }
 
-export const enum ACTIONS {
-  INIT = 'init',
-  MOVE = 'move',
-  RESET = 'reset',
-  CHOOSE_SQUARE = 'choose_square',
-}
+export const ACTIONS = {
+  INIT: 'init',
+  MOVE: 'move',
+  RESET: 'reset',
+  CHOOSE_SQUARE: 'choose_square',
+  PENDING_PROMOTION: 'pending_promotion',
+} as const;
 
 type Action =
-  | { type: ACTIONS.INIT; payload: { playerColor: 'w' | 'b' } }
-  | { type: ACTIONS.MOVE; payload: { from: string; to: string } }
-  | { type: ACTIONS.RESET }
-  | { type: ACTIONS.CHOOSE_SQUARE; payload: { chosenSquare: Square | null } };
+  | { type: typeof ACTIONS.INIT; payload: { playerColor: 'w' | 'b' } }
+  | { type: typeof ACTIONS.MOVE; payload: { from: string; to: string; promotion?: 'q' | 'r' | 'b' | 'n' } }
+  | { type: typeof ACTIONS.RESET }
+  | { type: typeof ACTIONS.CHOOSE_SQUARE; payload: { chosenSquare: Square | null } }
+  | { type: typeof ACTIONS.PENDING_PROMOTION; payload: { from: string; to: string; color: 'w' | 'b' } | null };
 
 function getInitialState(): State {
   const chess = new Chess();
@@ -30,6 +37,7 @@ function getInitialState(): State {
     moveIndex: 0,
     playerColor: 'w',
     chosenSquare: { square: null, moves: [] },
+    pendingPromotion: null,
   };
 }
 
@@ -46,8 +54,8 @@ function reducer(state: State, action: Action): State {
 
     case ACTIONS.MOVE: {
       const newChess = cloneChessInstance(state.chess);
-      const { from, to } = action.payload;
-      const move = newChess.move({ from, to });
+      const { from, to, promotion } = action.payload;
+      const move = newChess.move(promotion ? { from, to, promotion } : { from, to });
 
       if (!move) return state;
 
@@ -57,6 +65,7 @@ function reducer(state: State, action: Action): State {
         fen: newChess.fen(),
         moveIndex: state.moveIndex + 1,
         chosenSquare: { square: null, moves: [] },
+        pendingPromotion: null,
       };
     }
 
@@ -75,6 +84,10 @@ function reducer(state: State, action: Action): State {
       const moves = newChess.moves({ square: chosenSquare, verbose: true });
       if (!moves.length) return { ...state, chosenSquare: { square: null, moves: [] } };
       return { ...state, chess: newChess, chosenSquare: { square: chosenSquare, moves: moves } };
+    }
+
+    case ACTIONS.PENDING_PROMOTION: {
+      return { ...state, pendingPromotion: action.payload };
     }
 
     default:

@@ -37,16 +37,26 @@ export default function Square({ file, rank }: SquareProps) {
     accept: 'piece',
     canDrop: (item: { type: string; square: string }) => {
       if (!item || !item.square) return false;
-      // Use chosenSquare.moves if the dragged piece is the selected one
       if (chosenSquare.square === item.square && chosenSquare.moves) {
         return chosenSquare.moves.some((m) => m.to === squareName);
       }
-      // Otherwise, fallback to not allowing drop
       return false;
     },
     drop: (item: { type: string; square: string }) => {
       if (chosenSquare.square === item.square && chosenSquare.moves) {
-        if (chosenSquare.moves.some((m) => m.to === squareName)) {
+        const move = chosenSquare.moves.find((m) => m.to === squareName);
+        if (move) {
+          // Check for pawn promotion
+          const isPawn = move.piece === 'p';
+          const isLastRank =
+            (move.color === 'w' && squareName[1] === '8') || (move.color === 'b' && squareName[1] === '1');
+          if (isPawn && isLastRank) {
+            dispatch({
+              type: ACTIONS.PENDING_PROMOTION,
+              payload: { from: item.square, to: squareName, color: move.color },
+            });
+            return;
+          }
           dispatch({ type: ACTIONS.MOVE, payload: { from: item.square, to: squareName } });
         }
       }
@@ -59,10 +69,22 @@ export default function Square({ file, rank }: SquareProps) {
 
   // Click logic for moving or clearing indicators
   const handleSquareClick = () => {
-    // If a piece is selected and this square is a valid move, move the piece
     if (chosenSquare.square && chosenSquare.moves?.some((m) => m.to === squareName)) {
-      dispatch({ type: ACTIONS.MOVE, payload: { from: chosenSquare.square, to: squareName } });
-      return;
+      const move = chosenSquare.moves.find((m) => m.to === squareName);
+      if (move) {
+        const isPawn = move.piece === 'p';
+        const isLastRank =
+          (move.color === 'w' && squareName[1] === '8') || (move.color === 'b' && squareName[1] === '1');
+        if (isPawn && isLastRank) {
+          dispatch({
+            type: ACTIONS.PENDING_PROMOTION,
+            payload: { from: chosenSquare.square, to: squareName, color: move.color },
+          });
+          return;
+        }
+        dispatch({ type: ACTIONS.MOVE, payload: { from: chosenSquare.square, to: squareName } });
+        return;
+      }
     }
     // If clicking on a piece of the current turn, select it
     const piece = getPieceType();
