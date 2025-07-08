@@ -25,3 +25,11 @@ export const openings = [
     description: 'A solid response to the King’s Gambit: 1.e4 e5 2.f4 Bc5.',
   },
 ];
+
+export function formatTime(seconds: number) {
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}

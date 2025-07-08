@@ -1,16 +1,17 @@
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { useState, useRef, useEffect } from 'react';
 import { type Chess as ChessType } from 'chess.js';
 import { ChessProvider } from '@/components/chessboard/ChessProvider';
 import Chessboard, { type ChessboardHandle } from '@/components/chessboard/Chessboard';
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
+import Clock from '@/components/play/Clock';
 
 export default function Play() {
   const [chessInfo, setChessInfo] = useState<ChessType | null>(null);
@@ -18,7 +19,7 @@ export default function Play() {
 
   const [whiteTime, setWhiteTime] = useState(5 * 60);
   const [blackTime, setBlackTime] = useState(5 * 60);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
   const [winner, setWinner] = useState<'w' | 'b' | 'd' | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -67,36 +68,41 @@ export default function Play() {
   const handlePauseResume = () => setIsRunning((r) => !r);
 
   return (
-    <>
-      <div className='flex flex-col items-center mb-4 gap-2'>
-        <div className='flex gap-2'>
-          <Button onClick={handleNewGame}>New Game</Button>
-          <Button onClick={handlePauseResume}>{isRunning ? 'Pause' : 'Resume'}</Button>
-        </div>
-        <div className='flex gap-8 mt-2'>
-          <div className={`flex flex-col items-center ${chessInfo?.turn() === 'w' ? 'font-bold' : ''}`}>
-            <span className='font-semibold'>White</span>
-            <span className='text-2xl font-mono'>{formatTime(whiteTime)}</span>
-          </div>
-          <div className={`flex flex-col items-center ${chessInfo?.turn() === 'b' ? 'font-bold' : ''}`}>
-            <span className='font-semibold'>Black</span>
-            <span className='text-2xl font-mono'>{formatTime(blackTime)}</span>
-          </div>
-        </div>
+    <div className='flex flex-col items-center w-100 gap-2 py-10'>
+      <h1 className='text-2xl font-bold mb-8'>Let's Play Chess!</h1>
+      <div className='flex justify-between w-full gap-8 mt-2'>
+        <Clock label='White' time={whiteTime} />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button onClick={handlePauseResume}>Pause</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>Game Paused</DialogTitle>
+            <DialogDescription>This game is currently paused. You can resume whenever you're ready.</DialogDescription>
+            <DialogClose asChild>
+              <Button onClick={handlePauseResume}>Resume</Button>
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
+        <Clock label='Black' time={blackTime} />
       </div>
       <ChessProvider>
         <Chessboard setChessInfo={setChessInfo} ref={chessRef} />
       </ChessProvider>
-      {/* <Chess setChessInfo={setChessInfo} /> */}
-      {winner && (
-        <div className='fixed inset-0 bg-opacity-60 flex items-center justify-center z-50'>
-          <div className='rounded-lg shadow-lg p-8 text-2xl font-bold'>
+
+      <Dialog open={winner !== null}>
+        <DialogContent>
+          <DialogTitle>Game end!</DialogTitle>
+          <DialogDescription>
             {winner === 'w' && 'White wins!'}
             {winner === 'b' && 'Black wins!'}
             {winner === 'd' && 'Draw!'}
-          </div>
-        </div>
-      )}
-    </>
+          </DialogDescription>
+          <DialogClose asChild>
+            <Button onClick={handleNewGame}>New Game</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
