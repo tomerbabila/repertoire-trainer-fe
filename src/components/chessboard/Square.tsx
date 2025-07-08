@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useDrop } from 'react-dnd';
-import { getChar } from '@/helpers';
+import { getChar } from '@/lib/helpers';
 import { ACTIONS, useChess } from './ChessProvider';
 import Piece from './Piece';
 import { type Square as ChessSquare } from 'chess.js';

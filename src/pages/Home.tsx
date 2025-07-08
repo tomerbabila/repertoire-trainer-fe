@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { openings } from '@/helpers';
+import { openings } from '@/lib/helpers';
 import Opening from '@/components/home/Opening';
 
 export default function Home() {
