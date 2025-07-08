@@ -6,7 +6,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className='min-h-screen flex flex-col items-center py-10'>
+    <div className='flex flex-col items-center py-10'>
       <h1 className='text-2xl font-bold mb-8'>What opening would you like to learn today?</h1>
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
         {openings.map((opening) => (

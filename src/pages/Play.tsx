@@ -46,7 +46,10 @@ export default function Play() {
 
   // Detect winner
   useEffect(() => {
-    if (chessInfo?.isCheckmate() && !winner) setWinner(chessInfo?.turn());
+    if (chessInfo?.isCheckmate() && !winner) {
+      const winningColor = chessInfo.turn() === 'w' ? 'b' : 'w';
+      setWinner(winningColor);
+    }
   }, [chessInfo, winner]);
 
   // Detect draw/stalemate/insufficient material

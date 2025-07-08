@@ -11,7 +11,7 @@ export const initialBoard: (string | null)[][] = [
   ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
 ];
 
-export const openings = [
+export const openings: { name: string; key: string; description: string }[] = [
   { name: 'Vienna Game', key: 'vienna-game', description: 'A flexible opening starting with 1.e4 e5 2.Nc3.' },
   {
     name: 'Vienna Gambit',
@@ -24,6 +24,18 @@ export const openings = [
     key: 'kgd',
     description: 'A solid response to the King’s Gambit: 1.e4 e5 2.f4 Bc5.',
   },
+];
+
+type NavRoute = {
+  path: string;
+  label: string;
+  menu?: typeof openings;
+};
+
+export const NAV_ROUTES: NavRoute[] = [
+  { path: '/', label: 'Home' },
+  { path: '/play', label: 'Play' },
+  { path: '/practice/:opening', label: 'Practice', menu: openings },
 ];
 
 export function formatTime(seconds: number) {
